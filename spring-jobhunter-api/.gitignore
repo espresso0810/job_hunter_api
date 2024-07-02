@@ -1,9 +1,11 @@
+
 HELP.md
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+**/src/progress.txt
 
 ### STS ###
 .apt_generated
