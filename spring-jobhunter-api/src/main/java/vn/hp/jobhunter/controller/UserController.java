@@ -5,11 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.hp.jobhunter.domain.User;
 import vn.hp.jobhunter.service.UserService;
-import vn.hp.jobhunter.service.error.IdInvalidException;
+import vn.hp.jobhunter.util.error.IdInvalidException;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class UserController {
