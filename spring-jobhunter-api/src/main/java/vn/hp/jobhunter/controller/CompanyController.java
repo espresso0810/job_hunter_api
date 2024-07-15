@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import vn.hp.jobhunter.domain.Company;
 import vn.hp.jobhunter.domain.dto.ResultPaginationDTO;
 import vn.hp.jobhunter.service.CompanyService;
+import vn.hp.jobhunter.util.annotation.ApiMessage;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,16 +25,11 @@ public class CompanyController {
     }
 
     @GetMapping("companies")
+    @ApiMessage("Fetch All Companies")
     public ResponseEntity<ResultPaginationDTO> getAllCompanies(
             @Filter Specification<Company> spec,
-            @RequestParam("current") Optional<String> currentOptional,
-            @RequestParam("pageSize") Optional<String> pageSizeOptional) {
-//        String sCurrent = currentOptional.orElse("");
-//        String sPageSize = pageSizeOptional.orElse("");
-//        int current = Integer.parseInt(sCurrent) - 1;
-//        int pageSize = Integer.parseInt(sPageSize);
-//        Pageable pageable = PageRequest.of(current, pageSize);
-        return ResponseEntity.ok(this.companyService.fetchAllCompanies(spec));
+            Pageable pageable) {
+        return ResponseEntity.ok(this.companyService.fetchAllCompanies(spec, pageable));
     }
 
     @PostMapping("companies")

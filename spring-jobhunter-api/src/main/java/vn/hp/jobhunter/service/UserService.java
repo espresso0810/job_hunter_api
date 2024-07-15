@@ -2,6 +2,7 @@ package vn.hp.jobhunter.service;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import vn.hp.jobhunter.domain.User;
@@ -36,13 +37,13 @@ public class UserService {
         return userOptional.orElse(null);
     }
 
-    public ResultPaginationDTO fetchAllUser(Pageable pageable){
-        Page<User> userPage = this.userRepository.findAll(pageable);
+    public ResultPaginationDTO fetchAllUser(Specification<User> specification, Pageable pageable){
+        Page<User> userPage = this.userRepository.findAll(specification, pageable);
         ResultPaginationDTO rs = new ResultPaginationDTO();
         Meta meta = new Meta();
 
-        meta.setPage(userPage.getNumber() + 1);
-        meta.setPageSize(userPage.getSize());
+        meta.setPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
         meta.setPages(userPage.getTotalPages());
         meta.setTotal(userPage.getTotalElements());
 
