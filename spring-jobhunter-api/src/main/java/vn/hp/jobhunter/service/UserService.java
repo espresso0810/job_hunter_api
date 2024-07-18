@@ -6,12 +6,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import vn.hp.jobhunter.domain.User;
-import vn.hp.jobhunter.domain.dto.Meta;
-import vn.hp.jobhunter.domain.dto.ResultPaginationDTO;
+import vn.hp.jobhunter.domain.dto.*;
 import vn.hp.jobhunter.repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -48,22 +48,37 @@ public class UserService {
         meta.setTotal(userPage.getTotalElements());
 
         rs.setMeta(meta);
-        rs.setResult(userPage.getContent());
+
+        // remove sensitive data like password
+        List<ResUserDTO> listUser = userPage.getContent()
+                .stream().map(item-> new ResUserDTO(
+                        item.getId(),
+                        item.getEmail(),
+                        item.getName(),
+                        item.getGender(),
+                        item.getAddress(),
+                        item.getAge(),
+                        item.getUpdatedAt(),
+                        item.getCreatedAt()))
+                .collect(Collectors.toList());
+
+        rs.setResult(listUser);
         return rs;
     }
 
-    public User updateUser(User updatedUser){
+    public User updateUser(User reqUser){
 //        return this.userRepository.findById(updatedUser.getId()).map(existingUser ->{
 //            existingUser.setName(updatedUser.getName());
 //            existingUser.setPassword(updatedUser.getPassword());
 //            existingUser.setEmail(updatedUser.getEmail());
 //            return this.userRepository.save(existingUser);
 //        }).orElse(null);
-        User currentUser = this.getUserById(updatedUser.getId());
+        User currentUser = this.getUserById(reqUser.getId());
         if (currentUser != null){
-            currentUser.setEmail(updatedUser.getEmail());
-            currentUser.setName(updatedUser.getName());
-            currentUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+            currentUser.setAddress(reqUser.getAddress());
+            currentUser.setName(reqUser.getName());
+            currentUser.setGender(reqUser.getGender());
+            currentUser.setAge(reqUser.getAge());
             currentUser = this.userRepository.save(currentUser);
         }
         return currentUser;
@@ -71,5 +86,46 @@ public class UserService {
 
     public User getUserByUsername(String username){
         return this.userRepository.findByEmail(username);
+    }
+
+    public boolean isExistedEmail(String email){
+        return this.userRepository.existsByEmail(email);
+    }
+
+    public ResCreateUserDTO convertToResCreateDTO(User user){
+        ResCreateUserDTO res = new ResCreateUserDTO();
+        res.setId(user.getId());
+        res.setEmail(user.getEmail());
+        res.setName (user.getName());
+        res.setAge(user.getAge());
+        res.setCreatedAt(user.getCreatedAt());
+        res.setGender (user.getGender());
+        res.setAddress (user.getAddress());
+        return res;
+    }
+
+    public ResUserDTO convertToResUserDTO(User user){
+        ResUserDTO res = new ResUserDTO();
+        res.setId(user.getId());
+        res.setEmail(user.getEmail());
+        res.setName (user.getName());
+        res.setAge(user.getAge());
+        res.setUpdatedAt (user.getUpdatedAt());
+        res.setCreatedAt(user.getCreatedAt());
+        res.setGender (user.getGender());
+        res.setAddress (user.getAddress());
+        return res;
+    }
+
+    public ResUpdateUserDTO convertToResUpdateUserDTO(User user){
+        ResUpdateUserDTO res = new ResUpdateUserDTO();
+        res.setId(user.getId());
+        res.setEmail(user.getEmail());
+        res.setName (user.getName());
+        res.setAge(user.getAge());
+        res.setUpdatedAt(user.getUpdatedAt());
+        res.setGender (user.getGender());
+        res.setAddress (user.getAddress());
+        return res;
     }
 }

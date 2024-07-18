@@ -43,7 +43,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http, CustomAuthenticationEntryPoint customAuthenticationEntryPoint) throws Exception {
         http.csrf(c -> c.disable())
                 .cors(Customizer.withDefaults())
-                .authorizeHttpRequests(authz -> authz.requestMatchers("/", "/login").permitAll().anyRequest().authenticated())
+                .authorizeHttpRequests(authz -> authz.requestMatchers("/", "/api/v1/login").permitAll().anyRequest().authenticated())
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())
                         //Ghi đè mặc định cấu hình response oauth
                         .authenticationEntryPoint(customAuthenticationEntryPoint))

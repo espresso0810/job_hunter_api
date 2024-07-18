@@ -2,7 +2,6 @@ package vn.hp.jobhunter.controller;
 
 import com.turkraft.springfilter.boot.Filter;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -13,10 +12,8 @@ import vn.hp.jobhunter.domain.dto.ResultPaginationDTO;
 import vn.hp.jobhunter.service.CompanyService;
 import vn.hp.jobhunter.util.annotation.ApiMessage;
 
-import java.util.List;
-import java.util.Optional;
-
 @RestController
+@RequestMapping("api/v1")
 public class CompanyController {
     private final CompanyService companyService;
 
@@ -25,7 +22,7 @@ public class CompanyController {
     }
 
     @GetMapping("companies")
-    @ApiMessage("Fetch All Companies")
+    @ApiMessage("Fetch companies")
     public ResponseEntity<ResultPaginationDTO> getAllCompanies(
             @Filter Specification<Company> spec,
             Pageable pageable) {
