@@ -43,7 +43,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http, CustomAuthenticationEntryPoint customAuthenticationEntryPoint) throws Exception {
         http.csrf(c -> c.disable())
                 .cors(Customizer.withDefaults())
-                .authorizeHttpRequests(authz -> authz.requestMatchers("/", "/api/v1/auth/login").permitAll().anyRequest().authenticated())
+                .authorizeHttpRequests(authz -> authz.requestMatchers("/", "/api/v1/auth/login", "/api/v1/auth/refresh").permitAll().anyRequest().authenticated())
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())
                         //Ghi đè mặc định cấu hình response oauth
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
@@ -62,7 +62,7 @@ public class SecurityConfiguration {
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
         grantedAuthoritiesConverter.setAuthorityPrefix("");
-        grantedAuthoritiesConverter.setAuthoritiesClaimName("user");
+        grantedAuthoritiesConverter.setAuthoritiesClaimName("permission");
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
         return jwtAuthenticationConverter;
