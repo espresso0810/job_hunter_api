@@ -12,7 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import vn.hp.jobhunter.domain.User;
-import vn.hp.jobhunter.domain.dto.LoginDTO;
+import vn.hp.jobhunter.domain.request.ReqLoginDTO;
 import vn.hp.jobhunter.domain.dto.ResLoginDTO;
 import vn.hp.jobhunter.service.UserService;
 import vn.hp.jobhunter.util.SecurityUtil;
@@ -36,7 +36,7 @@ public class AuthController {
     }
 
     @PostMapping("auth/login")
-    public ResponseEntity<ResLoginDTO> login(@Valid @RequestBody LoginDTO loginDTO) {
+    public ResponseEntity<ResLoginDTO> login(@Valid @RequestBody ReqLoginDTO loginDTO) {
         //Nạp input gồm username/password vào Security
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword());
         //xác thực người dùng => cần viết hàm loadUserByUsername

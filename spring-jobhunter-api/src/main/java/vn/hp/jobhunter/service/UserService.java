@@ -40,7 +40,7 @@ public class UserService {
     public ResultPaginationDTO fetchAllUser(Specification<User> specification, Pageable pageable){
         Page<User> userPage = this.userRepository.findAll(specification, pageable);
         ResultPaginationDTO rs = new ResultPaginationDTO();
-        Meta meta = new Meta();
+        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
 
         meta.setPage(pageable.getPageNumber() + 1);
         meta.setPageSize(pageable.getPageSize());
@@ -53,8 +53,8 @@ public class UserService {
         List<ResUserDTO> listUser = userPage.getContent()
                 .stream().map(item-> new ResUserDTO(
                         item.getId(),
-                        item.getEmail(),
                         item.getName(),
+                        item.getEmail(),
                         item.getGender(),
                         item.getAddress(),
                         item.getAge(),
