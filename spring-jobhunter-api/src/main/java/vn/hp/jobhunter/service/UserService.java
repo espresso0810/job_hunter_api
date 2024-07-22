@@ -6,7 +6,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import vn.hp.jobhunter.domain.User;
-import vn.hp.jobhunter.domain.dto.*;
+import vn.hp.jobhunter.domain.response.*;
 import vn.hp.jobhunter.repository.UserRepository;
 
 import java.util.List;

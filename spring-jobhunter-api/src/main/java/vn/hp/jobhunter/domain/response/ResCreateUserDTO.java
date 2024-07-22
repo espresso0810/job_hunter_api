@@ -1,8 +1,6 @@
-package vn.hp.jobhunter.domain.dto;
+package vn.hp.jobhunter.domain.response;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.hp.jobhunter.util.constant.GenderEnum;
 
@@ -10,9 +8,7 @@ import java.time.Instant;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
-public class ResUserDTO {
+public class ResCreateUserDTO {
     private long id;
     private String name;
     private String email;
@@ -20,5 +16,4 @@ public class ResUserDTO {
     private String address;
     private int age;
     private Instant createdAt;
-    private Instant updatedAt;
 }
