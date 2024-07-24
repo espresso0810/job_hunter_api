@@ -13,7 +13,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import vn.hp.jobhunter.domain.User;
 import vn.hp.jobhunter.domain.request.ReqLoginDTO;
-import vn.hp.jobhunter.domain.response.ResLoginDTO;
+import vn.hp.jobhunter.domain.response.user.ResLoginDTO;
 import vn.hp.jobhunter.service.UserService;
 import vn.hp.jobhunter.util.SecurityUtil;
 import vn.hp.jobhunter.util.annotation.ApiMessage;

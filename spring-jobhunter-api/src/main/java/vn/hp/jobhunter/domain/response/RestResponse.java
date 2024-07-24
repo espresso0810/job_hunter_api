@@ -1,4 +1,4 @@
-package vn.hp.jobhunter.domain;
+package vn.hp.jobhunter.domain.response;
 
 public class RestResponse<T> {
     private int statusCode;

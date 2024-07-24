@@ -38,6 +38,10 @@ public class User {
     private Instant updatedAt;
     private String updatedBy;
 
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private Company company;
+
     @PrePersist
     public void handleBeforeCreate() {
         this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "";

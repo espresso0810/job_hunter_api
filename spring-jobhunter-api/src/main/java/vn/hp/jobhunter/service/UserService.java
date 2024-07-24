@@ -5,8 +5,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import vn.hp.jobhunter.domain.Company;
 import vn.hp.jobhunter.domain.User;
 import vn.hp.jobhunter.domain.response.*;
+import vn.hp.jobhunter.domain.response.user.ResCreateUserDTO;
+import vn.hp.jobhunter.domain.response.user.ResUpdateUserDTO;
+import vn.hp.jobhunter.domain.response.user.ResUserDTO;
 import vn.hp.jobhunter.repository.UserRepository;
 
 import java.util.List;
@@ -17,27 +21,33 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CompanyService companyService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder pe) {
+    public UserService(UserRepository userRepository, PasswordEncoder pe, CompanyService companyService) {
         this.userRepository = userRepository;
         this.passwordEncoder = pe;
+        this.companyService = companyService;
     }
 
     public User handleCreateUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        if (user.getCompany() != null) {
+            Optional<Company> companyOptional = this.companyService.findById(user.getCompany().getId());
+            user.setCompany(companyOptional.isPresent() ? companyOptional.get() : null);
+        }
         return this.userRepository.save(user);
     }
 
-    public void deleteUser(long id){
+    public void deleteUser(long id) {
         this.userRepository.deleteById(id);
     }
 
-    public User getUserById(long id){
-        Optional<User> userOptional= this.userRepository.findById(id);
+    public User getUserById(long id) {
+        Optional<User> userOptional = this.userRepository.findById(id);
         return userOptional.orElse(null);
     }
 
-    public ResultPaginationDTO fetchAllUser(Specification<User> specification, Pageable pageable){
+    public ResultPaginationDTO fetchAllUser(Specification<User> specification, Pageable pageable) {
         Page<User> userPage = this.userRepository.findAll(specification, pageable);
         ResultPaginationDTO rs = new ResultPaginationDTO();
         ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
@@ -51,7 +61,7 @@ public class UserService {
 
         // remove sensitive data like password
         List<ResUserDTO> listUser = userPage.getContent()
-                .stream().map(item-> new ResUserDTO(
+                .stream().map(item -> new ResUserDTO(
                         item.getId(),
                         item.getName(),
                         item.getEmail(),
@@ -59,85 +69,103 @@ public class UserService {
                         item.getAddress(),
                         item.getAge(),
                         item.getUpdatedAt(),
-                        item.getCreatedAt()))
+                        item.getCreatedAt(),
+                        new ResUserDTO.CompanyUser(item.getCompany() != null ? item.getCompany().getId() : 0,
+                                item.getCompany() != null ? item.getCompany().getName() : null)))
                 .collect(Collectors.toList());
 
         rs.setResult(listUser);
         return rs;
     }
 
-    public User updateUser(User reqUser){
-//        return this.userRepository.findById(updatedUser.getId()).map(existingUser ->{
-//            existingUser.setName(updatedUser.getName());
-//            existingUser.setPassword(updatedUser.getPassword());
-//            existingUser.setEmail(updatedUser.getEmail());
-//            return this.userRepository.save(existingUser);
-//        }).orElse(null);
+    public User updateUser(User reqUser) {
         User currentUser = this.getUserById(reqUser.getId());
-        if (currentUser != null){
+        if (currentUser != null) {
             currentUser.setAddress(reqUser.getAddress());
             currentUser.setName(reqUser.getName());
             currentUser.setGender(reqUser.getGender());
             currentUser.setAge(reqUser.getAge());
+            if (reqUser.getCompany() != null) {
+                Optional<Company> companyOptional = this.companyService.findById(reqUser.getCompany().getId());
+                currentUser.setCompany(companyOptional.isPresent() ? companyOptional.get() : null);
+            }
             currentUser = this.userRepository.save(currentUser);
         }
         return currentUser;
     }
 
-    public User getUserByUsername(String username){
+    public User getUserByUsername(String username) {
         return this.userRepository.findByEmail(username);
     }
 
-    public boolean isExistedEmail(String email){
+    public boolean isExistedEmail(String email) {
         return this.userRepository.existsByEmail(email);
     }
 
-    public ResCreateUserDTO convertToResCreateDTO(User user){
+    public ResCreateUserDTO convertToResCreateDTO(User user) {
         ResCreateUserDTO res = new ResCreateUserDTO();
+        ResCreateUserDTO.CompanyUser company = new ResCreateUserDTO.CompanyUser();
         res.setId(user.getId());
         res.setEmail(user.getEmail());
-        res.setName (user.getName());
+        res.setName(user.getName());
         res.setAge(user.getAge());
         res.setCreatedAt(user.getCreatedAt());
-        res.setGender (user.getGender());
-        res.setAddress (user.getAddress());
+        res.setGender(user.getGender());
+        res.setAddress(user.getAddress());
+        if (user.getCompany() != null) {
+            company.setId(user.getCompany().getId());
+            company.setName(user.getCompany().getName());
+            res.setCompany(company);
+        }
         return res;
     }
 
-    public ResUserDTO convertToResUserDTO(User user){
+    public ResUserDTO convertToResUserDTO(User user) {
         ResUserDTO res = new ResUserDTO();
+        ResUserDTO.CompanyUser company = new ResUserDTO.CompanyUser();
         res.setId(user.getId());
         res.setEmail(user.getEmail());
-        res.setName (user.getName());
-        res.setAge(user.getAge());
-        res.setUpdatedAt (user.getUpdatedAt());
-        res.setCreatedAt(user.getCreatedAt());
-        res.setGender (user.getGender());
-        res.setAddress (user.getAddress());
-        return res;
-    }
-
-    public ResUpdateUserDTO convertToResUpdateUserDTO(User user){
-        ResUpdateUserDTO res = new ResUpdateUserDTO();
-        res.setId(user.getId());
-        res.setEmail(user.getEmail());
-        res.setName (user.getName());
+        res.setName(user.getName());
         res.setAge(user.getAge());
         res.setUpdatedAt(user.getUpdatedAt());
-        res.setGender (user.getGender());
-        res.setAddress (user.getAddress());
+        res.setCreatedAt(user.getCreatedAt());
+        res.setGender(user.getGender());
+        res.setAddress(user.getAddress());
+        if (user.getCompany() != null) {
+            company.setId(user.getCompany().getId());
+            company.setName(user.getCompany().getName());
+            res.setCompany(company);
+        }
         return res;
     }
 
-    public void updateUserToken(String token, String email){
+    public ResUpdateUserDTO convertToResUpdateUserDTO(User user) {
+        ResUpdateUserDTO res = new ResUpdateUserDTO();
+        ResUpdateUserDTO.CompanyUser company = new ResUpdateUserDTO.CompanyUser();
+        res.setId(user.getId());
+        res.setEmail(user.getEmail());
+        res.setName(user.getName());
+        res.setAge(user.getAge());
+        res.setUpdatedAt(user.getUpdatedAt());
+        res.setGender(user.getGender());
+        res.setAddress(user.getAddress());
+        if (user.getCompany() != null) {
+            company.setId(user.getCompany().getId());
+            company.setName(user.getCompany().getName());
+            res.setCompany(company);
+        }
+        return res;
+    }
+
+    public void updateUserToken(String token, String email) {
         User currentUser = this.getUserByUsername(email);
-        if (currentUser != null){
+        if (currentUser != null) {
             currentUser.setRefreshToken(token);
             this.userRepository.save(currentUser);
         }
     }
 
-    public User getUserByRFTokenAndEmail(String email, String token){
+    public User getUserByRFTokenAndEmail(String email, String token) {
         return this.userRepository.findByEmailAndRefreshToken(email, token);
     }
 }
