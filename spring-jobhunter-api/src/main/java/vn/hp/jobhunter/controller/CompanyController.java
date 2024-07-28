@@ -11,6 +11,9 @@ import vn.hp.jobhunter.domain.Company;
 import vn.hp.jobhunter.domain.response.ResultPaginationDTO;
 import vn.hp.jobhunter.service.CompanyService;
 import vn.hp.jobhunter.util.annotation.ApiMessage;
+import vn.hp.jobhunter.util.error.IdInvalidException;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("api/v1")
@@ -27,6 +30,16 @@ public class CompanyController {
             @Filter Specification<Company> spec,
             Pageable pageable) {
         return ResponseEntity.ok(this.companyService.fetchAllCompanies(spec, pageable));
+    }
+
+    @GetMapping("companies/{id}")
+    @ApiMessage("Get company by id")
+    public ResponseEntity<Company> getCompany(@PathVariable("id") long id) throws IdInvalidException {
+        Optional<Company> companyOptional = this.companyService.findById(id);
+        if (companyOptional.isEmpty()){
+            throw new IdInvalidException("Công ty không tồn tại");
+        }
+        return ResponseEntity.ok(companyOptional.get());
     }
 
     @PostMapping("companies")

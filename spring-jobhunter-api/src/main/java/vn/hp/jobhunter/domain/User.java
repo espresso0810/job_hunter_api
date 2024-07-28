@@ -1,5 +1,6 @@
 package vn.hp.jobhunter.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -8,6 +9,7 @@ import vn.hp.jobhunter.util.SecurityUtil;
 import vn.hp.jobhunter.util.constant.GenderEnum;
 
 import java.time.Instant;
+import java.util.List;
 
 @Entity
 @Table(name="Users")
@@ -41,6 +43,10 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "company_id")
     private Company company;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Resume> resumes;
 
     @PrePersist
     public void handleBeforeCreate() {

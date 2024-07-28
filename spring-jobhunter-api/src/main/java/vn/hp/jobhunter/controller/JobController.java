@@ -10,9 +10,12 @@ import org.springframework.web.bind.annotation.*;
 import vn.hp.jobhunter.domain.Job;
 import vn.hp.jobhunter.domain.response.ResultPaginationDTO;
 import vn.hp.jobhunter.domain.response.job.ResCreateJobDTO;
+import vn.hp.jobhunter.domain.response.job.ResUpdateJobDTO;
 import vn.hp.jobhunter.service.JobService;
 import vn.hp.jobhunter.util.annotation.ApiMessage;
 import vn.hp.jobhunter.util.error.IdInvalidException;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("api/v1")
@@ -31,9 +34,16 @@ public class JobController {
 
     @PutMapping("jobs")
     @ApiMessage("Update job")
-    public ResponseEntity<ResCreateJobDTO> updateJob(@Valid @RequestBody Job j){
-        return ResponseEntity.ok(this.jobService.create(j));
+    public ResponseEntity<ResUpdateJobDTO> update(@Valid @RequestBody Job job) throws IdInvalidException {
+        Optional<Job> currentJob = this.jobService.findById(job.getId());
+        if (currentJob.isEmpty()) {
+            throw new IdInvalidException("Job not found");
+        }
+
+        return ResponseEntity.ok()
+                .body(this.jobService.update(job, currentJob.get()));
     }
+
 
     @DeleteMapping("jobs/{id}")
     @ApiMessage("Delete job")
