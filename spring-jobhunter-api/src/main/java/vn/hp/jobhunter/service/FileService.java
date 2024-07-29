@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -34,16 +35,18 @@ public class FileService {
         }
     }
 
-    public String store(MultipartFile file, String folder) throws URISyntaxException,
-            IOException {
-        // create unique filename
-        String finalName = System.currentTimeMillis() + "-" + file.getOriginalFilename();
+    public String store(MultipartFile file, String folder) throws IOException {
+        // Tạo tên file duy nhất
+        String originalFileName = file.getOriginalFilename();
+        String finalName = System.currentTimeMillis() + "-" + originalFileName;
 
-        URI uri = new URI(baseURI + folder + "/" + finalName);
+        String encodedFileName = URLEncoder.encode(finalName, "UTF-8").replace("+", "%20");
+        // Tạo URI từ baseURI, folder và tên file đã mã hóa
+        URI uri = URI.create(baseURI + folder + "/" + encodedFileName);
+
         Path path = Paths.get(uri);
         try (InputStream inputStream = file.getInputStream()) {
-            Files.copy(inputStream, path,
-                    StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
         }
         return finalName;
     }
