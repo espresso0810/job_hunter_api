@@ -38,7 +38,11 @@ public class SecurityUtil {
     @Value("${hp.jwt.refreshtoken-validity-in-seconds}")
     private long refreshTokenExpiration;
 
-    public String createAccessToken(String email, ResLoginDTO.UserLogin resLoginDTO) {
+    public String createAccessToken(String email, ResLoginDTO resLoginDTO) {
+        ResLoginDTO.UserInsideToken userToken = new ResLoginDTO.UserInsideToken();
+        userToken.setId(resLoginDTO.getUser().getId());
+        userToken.setEmail(resLoginDTO.getUser().getEmail());
+        userToken.setName(resLoginDTO.getUser().getName());
 
         Instant now = Instant.now();
         Instant validity = now.plus(this.accessTokenExpiration, ChronoUnit.SECONDS);
@@ -52,7 +56,7 @@ public class SecurityUtil {
                 .issuedAt(now)
                 .expiresAt(validity)
                 .subject(email)
-                .claim("user", resLoginDTO)
+                .claim("user", userToken)
                 .claim("permission", listAuthority)
                 .build();
 
@@ -66,12 +70,17 @@ public class SecurityUtil {
         Instant now = Instant.now();
         Instant validity = now.plus(this.refreshTokenExpiration, ChronoUnit.SECONDS);
 
+        ResLoginDTO.UserInsideToken userToken = new ResLoginDTO.UserInsideToken();
+        userToken.setId(res.getUser().getId());
+        userToken.setEmail(res.getUser().getEmail());
+        userToken.setName(res.getUser().getName());
+
         // @formatter:off
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuedAt(now)
                 .expiresAt(validity)
                 .subject(email)
-                .claim("user", res.getUser())
+                .claim("user", userToken)
                 .build();
 
         JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();

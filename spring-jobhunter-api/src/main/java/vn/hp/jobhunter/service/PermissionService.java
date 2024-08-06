@@ -76,4 +76,10 @@ public class PermissionService {
             this.permissionRepository.delete(curr);
         }
     }
+
+    public boolean isSameName(Permission p) {
+        Permission pDB = this.fetchById(p.getId());
+        return pDB != null && pDB.getName().equals(p.getName());
+    }
+
 }

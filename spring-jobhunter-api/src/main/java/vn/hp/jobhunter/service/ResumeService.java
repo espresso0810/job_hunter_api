@@ -1,12 +1,17 @@
 package vn.hp.jobhunter.service;
 
+import com.turkraft.springfilter.converter.FilterSpecification;
+import com.turkraft.springfilter.parser.node.FilterNode;
+import com.turkraft.springfilter.builder.FilterBuilder;
+import com.turkraft.springfilter.converter.FilterSpecificationConverter;
+import com.turkraft.springfilter.parser.FilterParser;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import vn.hp.jobhunter.domain.Job;
 import vn.hp.jobhunter.domain.Resume;
-import vn.hp.jobhunter.domain.User;
 import vn.hp.jobhunter.domain.response.ResultPaginationDTO;
 import vn.hp.jobhunter.domain.response.resume.ResCreateResumeDTO;
 import vn.hp.jobhunter.domain.response.resume.ResResumeDTO;
@@ -14,13 +19,26 @@ import vn.hp.jobhunter.domain.response.resume.ResUpdateResumeDTO;
 import vn.hp.jobhunter.repository.JobRepository;
 import vn.hp.jobhunter.repository.ResumeRepository;
 import vn.hp.jobhunter.repository.UserRepository;
+import vn.hp.jobhunter.util.SecurityUtil;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+
 
 @Service
 public class ResumeService {
+
+    @Autowired
+    FilterBuilder fb;
+
+    @Autowired
+    private FilterParser filterParser;
+
+    @Autowired
+    private FilterSpecificationConverter filterSpecificationConverter;
+
+
     private final ResumeRepository resumeRepository;
     private final UserRepository userRepository;
     private final JobRepository jobRepository;
@@ -90,6 +108,19 @@ public class ResumeService {
 
     public ResultPaginationDTO getAllResumes(Specification<Resume> specification, Pageable pageable) {
         Page<Resume> resumes = this.resumeRepository.findAll(specification, pageable);
+        return createResultPaginationDTO(resumes, pageable);
+    }
+
+    public ResultPaginationDTO fetchResumeByUser(Pageable pageable) {
+        String email = SecurityUtil.getCurrentUserLogin().orElse("");
+        FilterNode node = filterParser.parse("email='" + email + "'");
+        FilterSpecification<Resume> spec = filterSpecificationConverter.convert(node);
+
+        Page<Resume> resumes = this.resumeRepository.findAll(spec, pageable);
+        return createResultPaginationDTO(resumes, pageable);
+    }
+
+    private ResultPaginationDTO createResultPaginationDTO(Page<Resume> resumes, Pageable pageable) {
         ResultPaginationDTO rs = new ResultPaginationDTO();
         ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
 
@@ -100,7 +131,7 @@ public class ResumeService {
 
         rs.setMeta(meta);
 
-        // remove sensitive data
+        // Remove sensitive data
         List<ResResumeDTO> listResume = resumes.getContent()
                 .stream().map(this::getResume)
                 .toList();
@@ -108,4 +139,5 @@ public class ResumeService {
         rs.setResult(listResume);
         return rs;
     }
+
 }

@@ -12,6 +12,7 @@ import vn.hp.jobhunter.domain.response.user.ResCreateUserDTO;
 import vn.hp.jobhunter.domain.response.user.ResUpdateUserDTO;
 import vn.hp.jobhunter.domain.response.user.ResUserDTO;
 import vn.hp.jobhunter.repository.UserRepository;
+import vn.hp.jobhunter.domain.Role;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,18 +23,27 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final CompanyService companyService;
+    private final RoleService roleService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder pe, CompanyService companyService) {
+    public UserService(UserRepository userRepository, PasswordEncoder pe, CompanyService companyService, RoleService roleService) {
         this.userRepository = userRepository;
         this.passwordEncoder = pe;
         this.companyService = companyService;
+        this.roleService = roleService;
     }
 
     public User handleCreateUser(User user) {
+        //hash password
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        //Check company
         if (user.getCompany() != null) {
             Optional<Company> companyOptional = this.companyService.findById(user.getCompany().getId());
             user.setCompany(companyOptional.isPresent() ? companyOptional.get() : null);
+        }
+        //check role
+        if (user.getRole() != null) {
+            Role r = this.roleService.fetchById(user.getRole().getId());
+            user.setRole(r != null ? r : null);
         }
         return this.userRepository.save(user);
     }
@@ -61,17 +71,7 @@ public class UserService {
 
         // remove sensitive data like password
         List<ResUserDTO> listUser = userPage.getContent()
-                .stream().map(item -> new ResUserDTO(
-                        item.getId(),
-                        item.getName(),
-                        item.getEmail(),
-                        item.getGender(),
-                        item.getAddress(),
-                        item.getAge(),
-                        item.getUpdatedAt(),
-                        item.getCreatedAt(),
-                        new ResUserDTO.CompanyUser(item.getCompany() != null ? item.getCompany().getId() : 0,
-                                item.getCompany() != null ? item.getCompany().getName() : null)))
+                .stream().map(item -> this.convertToResUserDTO(item))
                 .collect(Collectors.toList());
 
         rs.setResult(listUser);
@@ -85,9 +85,15 @@ public class UserService {
             currentUser.setName(reqUser.getName());
             currentUser.setGender(reqUser.getGender());
             currentUser.setAge(reqUser.getAge());
+            //check company
             if (reqUser.getCompany() != null) {
                 Optional<Company> companyOptional = this.companyService.findById(reqUser.getCompany().getId());
                 currentUser.setCompany(companyOptional.isPresent() ? companyOptional.get() : null);
+            }
+            //check role
+            if (reqUser.getRole() != null) {
+                Role r = this.roleService.fetchById(currentUser.getRole().getId());
+                currentUser.setRole(r != null ? r : null);
             }
             currentUser = this.userRepository.save(currentUser);
         }
@@ -123,6 +129,8 @@ public class UserService {
     public ResUserDTO convertToResUserDTO(User user) {
         ResUserDTO res = new ResUserDTO();
         ResUserDTO.CompanyUser company = new ResUserDTO.CompanyUser();
+        ResUserDTO.RoleUser role = new ResUserDTO.RoleUser();
+
         res.setId(user.getId());
         res.setEmail(user.getEmail());
         res.setName(user.getName());
@@ -131,11 +139,19 @@ public class UserService {
         res.setCreatedAt(user.getCreatedAt());
         res.setGender(user.getGender());
         res.setAddress(user.getAddress());
+
         if (user.getCompany() != null) {
             company.setId(user.getCompany().getId());
             company.setName(user.getCompany().getName());
             res.setCompany(company);
         }
+
+        if (user.getRole() != null){
+            role.setId(user.getRole().getId());
+            role.setName(user.getRole().getName());
+            res.setRole(role);
+        }
+
         return res;
     }
 
@@ -149,6 +165,7 @@ public class UserService {
         res.setUpdatedAt(user.getUpdatedAt());
         res.setGender(user.getGender());
         res.setAddress(user.getAddress());
+
         if (user.getCompany() != null) {
             company.setId(user.getCompany().getId());
             company.setName(user.getCompany().getName());

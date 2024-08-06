@@ -25,7 +25,7 @@ public class PermissionController {
     @PostMapping("permissions")
     @ApiMessage("Create permission")
     public ResponseEntity<Permission> createPermission(@Valid @RequestBody Permission p) throws IdInvalidException {
-        if (this.permissionService.isPermissionExisted(p)){
+        if (this.permissionService.isPermissionExisted(p)) {
             throw new IdInvalidException("Permission đã tồn tại");
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(this.permissionService.create(p));
@@ -34,12 +34,13 @@ public class PermissionController {
     @PutMapping("permissions")
     @ApiMessage("Update permission")
     public ResponseEntity<Permission> updatePermission(@Valid @RequestBody Permission p) throws IdInvalidException {
-        if (!this.permissionService.existedById(p.getId())){
+        if (!this.permissionService.existedById(p.getId())) {
             throw new IdInvalidException("Permission id: " + p.getId() + " không tồn tại");
         }
 
-        if (this.permissionService.isPermissionExisted(p)){
-            throw new IdInvalidException("Nôi dung Permission đã tồn tại");
+        if (this.permissionService.isPermissionExisted(p)) {
+            if (this.permissionService.isSameName(p))
+                throw new IdInvalidException("Permission đã tồn tại");
         }
 
         return ResponseEntity.ok(this.permissionService.update(p));
@@ -47,7 +48,7 @@ public class PermissionController {
 
     @GetMapping("permissions")
     @ApiMessage("Get permission(s)")
-    public ResponseEntity<ResultPaginationDTO> getPermissions(@Filter Specification<Permission> spec, Pageable pageable){
+    public ResponseEntity<ResultPaginationDTO> getPermissions(@Filter Specification<Permission> spec, Pageable pageable) {
         return ResponseEntity.ok(this.permissionService.getPermissions(spec, pageable));
     }
 

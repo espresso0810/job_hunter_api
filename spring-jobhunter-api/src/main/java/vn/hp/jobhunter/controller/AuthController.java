@@ -3,6 +3,7 @@ package vn.hp.jobhunter.controller;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,6 +14,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import vn.hp.jobhunter.domain.User;
 import vn.hp.jobhunter.domain.request.ReqLoginDTO;
+import vn.hp.jobhunter.domain.response.user.ResCreateUserDTO;
 import vn.hp.jobhunter.domain.response.user.ResLoginDTO;
 import vn.hp.jobhunter.service.UserService;
 import vn.hp.jobhunter.util.SecurityUtil;
@@ -50,12 +52,12 @@ public class AuthController {
         // Lấy thông tin người dùng trong db thay vì thay đổi spring security
         User currentUserDB = this.userService.getUserByUsername(loginDTO.getUsername());
         if (currentUserDB != null) {
-            ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(currentUserDB.getId(), currentUserDB.getEmail(), currentUserDB.getName());
+            ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(currentUserDB.getId(), currentUserDB.getEmail(), currentUserDB.getName(), currentUserDB.getRole());
             responseLoginDTO.setUser(userLogin);
         }
 
         // Tạo token
-        String accessToken = this.securityUtil.createAccessToken(authentication.getName(), responseLoginDTO.getUser());
+        String accessToken = this.securityUtil.createAccessToken(authentication.getName(), responseLoginDTO);
         responseLoginDTO.setAccessToken(accessToken);
         // Tạo RF token
         String refresh_token = this.securityUtil.createRefreshToken(loginDTO.getUsername(), responseLoginDTO);
@@ -93,7 +95,7 @@ public class AuthController {
     @GetMapping("auth/refresh")
     @ApiMessage("Get new refresh token")
     public ResponseEntity<ResLoginDTO> getNewRefreshToken(@CookieValue(name = "refresh_token", defaultValue = "none") String refreshToken) throws IdInvalidException {
-        if (refreshToken.equals("none")){
+        if (refreshToken.equals("none")) {
             throw new IdInvalidException("Thiếu refresh token ở cookie");
         }
 
@@ -112,12 +114,13 @@ public class AuthController {
             ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(
                     currentUserDB.getId(),
                     currentUserDB.getEmail(),
-                    currentUserDB.getName());
+                    currentUserDB.getName(),
+                    currentUserDB.getRole());
             res.setUser(userLogin);
         }
 
         // create access token
-        String access_token = this.securityUtil.createAccessToken(email, res.getUser());
+        String access_token = this.securityUtil.createAccessToken(email, res);
         res.setAccessToken(access_token);
 
         // create refresh token
@@ -144,7 +147,7 @@ public class AuthController {
     @ApiMessage("Logout")
     public ResponseEntity<Void> logout() throws IdInvalidException {
         String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "";
-        if (email.equals("")){
+        if (email.equals("")) {
             throw new IdInvalidException("Accesstoken không hợp lệ");
         }
 
@@ -162,5 +165,16 @@ public class AuthController {
         return ResponseEntity
                 .ok()
                 .header(HttpHeaders.SET_COOKIE, deleteSpringCookie.toString()).body(null);
+    }
+
+    @PostMapping("auth/register")
+    @ApiMessage("Register a user")
+    public ResponseEntity<ResCreateUserDTO> resgister(@Valid @RequestBody User user) throws IdInvalidException {
+        if (this.userService.isExistedEmail(user.getEmail())){
+            throw new IdInvalidException("Email " + user.getEmail() + " đã tồn tại");
+        }
+
+        User newUser = this.userService.handleCreateUser(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.userService.convertToResCreateDTO(newUser));
     }
 }
