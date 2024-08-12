@@ -34,7 +34,7 @@ public class PermissionController {
     @PutMapping("permissions")
     @ApiMessage("Update permission")
     public ResponseEntity<Permission> updatePermission(@Valid @RequestBody Permission p) throws IdInvalidException {
-        if (!this.permissionService.existedById(p.getId())) {
+        if (this.permissionService.existedId(p.getId())) {
             throw new IdInvalidException("Permission id: " + p.getId() + " không tồn tại");
         }
 
@@ -56,7 +56,7 @@ public class PermissionController {
     @ApiMessage("Delete a permission")
     public ResponseEntity<Void> delete(@PathVariable("id") long id) throws IdInvalidException {
         // check exist by id
-        if (!this.permissionService.existedById(id)) {
+        if (this.permissionService.existedId(id)) {
             throw new IdInvalidException("Permission id = " + id + " không tồn tại.");
         }
         this.permissionService.delete(id);

@@ -92,7 +92,7 @@ public class UserService {
             }
             //check role
             if (reqUser.getRole() != null) {
-                Role r = this.roleService.fetchById(currentUser.getRole().getId());
+                Role r = this.roleService.fetchById(reqUser.getRole().getId());
                 currentUser.setRole(r != null ? r : null);
             }
             currentUser = this.userRepository.save(currentUser);

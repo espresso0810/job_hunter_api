@@ -6,7 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import vn.hp.jobhunter.domain.Role;
 import vn.hp.jobhunter.domain.response.ResultPaginationDTO;
@@ -50,7 +49,8 @@ public class RoleController {
 
     @GetMapping("roles")
     @ApiMessage("Get roles")
-    public ResponseEntity<ResultPaginationDTO> getRoles(@Filter Specification<Role> spec, Pageable pageable) {
+    public ResponseEntity<ResultPaginationDTO> getRoles(
+            @Filter Specification<Role> spec, Pageable pageable) {
         return ResponseEntity.ok(this.roleService.getRoles(spec, pageable));
     }
 

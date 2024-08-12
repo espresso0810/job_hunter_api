@@ -3,11 +3,9 @@ package vn.hp.jobhunter.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.hp.jobhunter.domain.Permission;
-import vn.hp.jobhunter.domain.Skill;
 import vn.hp.jobhunter.domain.response.ResultPaginationDTO;
 import vn.hp.jobhunter.repository.PermissionRepository;
 
@@ -48,8 +46,8 @@ public class PermissionService {
     public Permission fetchById(long id){
         return this.permissionRepository.findById(id).orElse(null);
     }
-    public boolean existedById(long id){
-        return this.permissionRepository.existsById(id);
+    public boolean existedId(long id){
+        return !this.permissionRepository.existsById(id);
     }
 
     public ResultPaginationDTO getPermissions(Specification<Permission> spec, Pageable pageable){
@@ -57,7 +55,7 @@ public class PermissionService {
         ResultPaginationDTO res = new ResultPaginationDTO();
         ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
 
-        meta.setPage(pageable.getPageNumber());
+        meta.setPage(pageable.getPageNumber() + 1);
         meta.setPageSize(pageable.getPageSize());
         meta.setPages(permissionPage.getTotalPages());
         meta.setTotal(permissionPage.getTotalElements());

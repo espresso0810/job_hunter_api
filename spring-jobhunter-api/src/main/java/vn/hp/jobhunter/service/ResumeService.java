@@ -115,7 +115,6 @@ public class ResumeService {
         String email = SecurityUtil.getCurrentUserLogin().orElse("");
         FilterNode node = filterParser.parse("email='" + email + "'");
         FilterSpecification<Resume> spec = filterSpecificationConverter.convert(node);
-
         Page<Resume> resumes = this.resumeRepository.findAll(spec, pageable);
         return createResultPaginationDTO(resumes, pageable);
     }
