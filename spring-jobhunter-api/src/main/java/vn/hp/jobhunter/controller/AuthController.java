@@ -97,7 +97,7 @@ public class AuthController {
     @ApiMessage("Get new refresh token")
     public ResponseEntity<ResLoginDTO> getNewRefreshToken(@CookieValue(name = "refresh_token", defaultValue = "none") String refreshToken) throws IdInvalidException {
         if (refreshToken.equals("none")) {
-            throw new IdInvalidException("Thiếu refresh token ở cookie");
+            throw new IdInvalidException("Vui lòng đăng nhập");
         }
 
         // Check RFtoken hợp lệ
