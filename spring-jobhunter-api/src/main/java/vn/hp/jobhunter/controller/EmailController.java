@@ -1,25 +1,31 @@
 package vn.hp.jobhunter.controller;
 
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import vn.hp.jobhunter.service.EmailService;
+import vn.hp.jobhunter.service.SubscriberService;
 import vn.hp.jobhunter.util.annotation.ApiMessage;
 
 @RestController
 @RequestMapping("api/v1")
 public class EmailController {
-    private final EmailService emailService;
+    private final SubscriberService subscriberService;
 
-    public EmailController(EmailService emailService) {
-        this.emailService = emailService;
+    public EmailController(SubscriberService subscriberService) {
+        this.subscriberService = subscriberService;
     }
+
 
     @GetMapping("email")
     @ApiMessage("Send simple email")
+//    @Scheduled(cron = "*/30 * * * * *")
+//    @Transactional
     public String sendSimpleEmail(){
-        //this.emailService.sendEmailSync("amazingname09@gmail.com", "test spring boot", "<h1><b>Oke!</b></h1>", false, true);
-        this.emailService.sendEmailFromTemplateSync("amazingname09@gmail.com", "Test", "job");
+        //System.out.println("Test email");
+        this.subscriberService.sendSubscribersEmailJobs();
         return "Ok!";
     }
 }

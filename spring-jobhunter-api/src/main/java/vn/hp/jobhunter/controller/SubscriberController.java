@@ -2,15 +2,13 @@ package vn.hp.jobhunter.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.hp.jobhunter.domain.Subscriber;
 import vn.hp.jobhunter.service.SubscriberService;
+import vn.hp.jobhunter.util.SecurityUtil;
 import vn.hp.jobhunter.util.annotation.ApiMessage;
 import vn.hp.jobhunter.util.error.IdInvalidException;
-
-import java.util.Optional;
 
 @RestController
 @RequestMapping("api/v1")
@@ -39,5 +37,12 @@ public class SubscriberController {
         }
         return ResponseEntity.ok(this.subscriberService.update(subsDB, s));
 
+    }
+
+    @PostMapping("subscribers/skills")
+    @ApiMessage("Get subscriber's skills")
+    public ResponseEntity<Subscriber> getSubsSkill(){
+        String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "";
+        return ResponseEntity.ok(this.subscriberService.findByEmail(email));
     }
 }
